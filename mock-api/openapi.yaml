@@ -1,0 +1,32 @@
+# openapi.yaml - Swagger specification for the mock API
+openapi: "3.0.0"
+info:
+  title: "Mock Node API"
+  version: "1.0.0"
+paths:
+  /api/nodes:
+    get:
+      summary: "Get list of node types"
+      responses:
+        '200':
+          description: "Successful response – returns an array of node types"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NodeType'
+components:
+  schemas:
+    NodeType:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "1"
+        name:
+          type: string
+          example: "Data Source"
+      required:
+        - id
+        - name

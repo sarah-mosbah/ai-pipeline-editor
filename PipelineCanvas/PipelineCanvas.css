@@ -1,0 +1,50 @@
+/* PipelineCanvas specific styles */
+.canvas {
+  grid-area: canvas;
+  position: relative;
+  overflow: hidden;
+}
+
+.toolbar {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--muted);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn.primary {
+  background: var(--accent);
+  border-color: transparent;
+}
+
+/* Node states for ReactFlow nodes */
+.node-idle {
+  border: 1px solid var(--muted);
+  background: var(--panel);
+}
+
+.node-running {
+  border: 1px solid var(--warn);
+  box-shadow: 0 0 0 2px rgba(var(--warn), 0.1) inset;
+}
+
+.node-done {
+  border: 1px solid var(--ok);
+  box-shadow: 0 0 0 2px rgba(var(--ok), 0.1) inset;
+}

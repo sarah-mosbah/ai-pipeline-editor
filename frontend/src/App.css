@@ -1,0 +1,34 @@
+/* App layout and component specific styles */
+.app {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: 1fr 220px;
+  grid-template-areas: "palette canvas" "logs logs";
+  height: 100%;
+  gap: 12px;
+  padding: 12px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--muted);
+  border-radius: 10px;
+}
+
+.palette {
+  grid-area: palette;
+  padding: 12px;
+  overflow: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.h1 {
+  font-size: 18px;
+  margin: 0;
+}
