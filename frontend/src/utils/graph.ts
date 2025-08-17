@@ -1,101 +1,102 @@
 import type { Connection, Edge, Node } from "reactflow";
 export function nodeIncomingCount(nodeId: string, edges: Edge[]) {
-  return edges.filter((e) => e.target === nodeId).length;
+  return edges.filter((edge) => edge.target === nodeId).length;
 }
+
 export function nodeOutgoingCount(nodeId: string, edges: Edge[]) {
-  return edges.filter((e) => e.source === nodeId).length;
+  return edges.filter((edge) => edge.source === nodeId).length;
 }
 export function neighbors(nodeId: string, edges: Edge[]) {
-  return edges.filter((e) => e.source === nodeId).map((e) => e.target);
+  return edges.filter((edge) => edge.source === nodeId).map((edge) => edge.target);
 }
-export function hasPath(src: string, dst: string, edges: Edge[]): boolean {
-  const q: string[] = [src];
-  const v = new Set<string>([src]);
-  while (q.length) {
-    const u = q.shift()!;
-    if (u === dst) return true;
-    for (const n of neighbors(u, edges))
-      if (!v.has(n)) {
-        v.add(n);
-        q.push(n);
+export function hasPath(sourceNodeId: string, destinationNodeId: string, edges: Edge[]): boolean {
+  const nodeQueue: string[] = [sourceNodeId];
+  const visitedNodes = new Set<string>([sourceNodeId]);
+  while (nodeQueue.length) {
+    const currentNodeId = nodeQueue.shift()!;
+    if (currentNodeId === destinationNodeId) return true;
+    for (const neighborNodeId of neighbors(currentNodeId, edges))
+      if (!visitedNodes.has(neighborNodeId)) {
+        visitedNodes.add(neighborNodeId);
+        nodeQueue.push(neighborNodeId);
       }
   }
   return false;
 }
 export function hasCycle(nodes: Node[], edges: Edge[]): boolean {
-  const indeg = new Map<string, number>();
-  nodes.forEach((n) => indeg.set(n.id, 0));
-  edges.forEach((e) => indeg.set(e.target, (indeg.get(e.target) ?? 0) + 1));
-  const q = nodes.filter((n) => (indeg.get(n.id) ?? 0) === 0).map((n) => n.id);
-  let removed = 0;
-  while (q.length) {
-    const u = q.shift()!;
-    removed++;
+  const incomingDegreeMap = new Map<string, number>();
+  nodes.forEach((node) => incomingDegreeMap.set(node.id, 0));
+  edges.forEach((edge) => incomingDegreeMap.set(edge.target, (incomingDegreeMap.get(edge.target) ?? 0) + 1));
+  const nodesWithNoIncomingEdges = nodes.filter((node) => (incomingDegreeMap.get(node.id) ?? 0) === 0).map((node) => node.id);
+  let processedNodesCount = 0;
+  while (nodesWithNoIncomingEdges.length) {
+    const currentNodeId = nodesWithNoIncomingEdges.shift()!;
+    processedNodesCount++;
     edges
-      .filter((e) => e.source === u)
-      .forEach((e) => {
-        const t = e.target;
-        const d = (indeg.get(t) ?? 0) - 1;
-        indeg.set(t, d);
-        if (d === 0) q.push(t);
+      .filter((edge) => edge.source === currentNodeId)
+      .forEach((edge) => {
+        const targetNodeId = edge.target;
+        const newIncomingDegree = (incomingDegreeMap.get(targetNodeId) ?? 0) - 1;
+        incomingDegreeMap.set(targetNodeId, newIncomingDegree);
+        if (newIncomingDegree === 0) nodesWithNoIncomingEdges.push(targetNodeId);
       });
   }
-  return removed !== nodes.length;
+  return processedNodesCount !== nodes.length;
 }
 export function topologicalOrder(nodes: Node[], edges: Edge[]): Node[] {
-  const indeg = new Map<string, number>();
-  const byId = new Map(nodes.map((n) => [n.id, n]));
-  nodes.forEach((n) => indeg.set(n.id, 0));
-  edges.forEach((e) => indeg.set(e.target, (indeg.get(e.target) ?? 0) + 1));
-  const q = nodes.filter((n) => (indeg.get(n.id) ?? 0) === 0).map((n) => n.id);
-  const order: Node[] = [];
-  while (q.length) {
-    const u = q.shift()!;
-    order.push(byId.get(u)!);
+  const incomingDegreeMap = new Map<string, number>();
+  const nodeIdToNodeMap = new Map(nodes.map((node) => [node.id, node]));
+  nodes.forEach((node) => incomingDegreeMap.set(node.id, 0));
+  edges.forEach((edge) => incomingDegreeMap.set(edge.target, (incomingDegreeMap.get(edge.target) ?? 0) + 1));
+  const nodesWithNoIncomingEdges = nodes.filter((node) => (incomingDegreeMap.get(node.id) ?? 0) === 0).map((node) => node.id);
+  const topologicallySortedNodes: Node[] = [];
+  while (nodesWithNoIncomingEdges.length) {
+    const currentNodeId = nodesWithNoIncomingEdges.shift()!;
+    topologicallySortedNodes.push(nodeIdToNodeMap.get(currentNodeId)!);
     edges
-      .filter((e) => e.source === u)
-      .forEach((e) => {
-        const t = e.target;
-        const d = (indeg.get(t) ?? 0) - 1;
-        indeg.set(t, d);
-        if (d === 0) q.push(t);
+      .filter((edge) => edge.source === currentNodeId)
+      .forEach((edge) => {
+        const targetNodeId = edge.target;
+        const newIncomingDegree = (incomingDegreeMap.get(targetNodeId) ?? 0) - 1;
+        incomingDegreeMap.set(targetNodeId, newIncomingDegree);
+        if (newIncomingDegree === 0) nodesWithNoIncomingEdges.push(targetNodeId);
       });
   }
-  if (order.length !== nodes.length)
+  if (topologicallySortedNodes.length !== nodes.length)
     throw new Error("Cannot compute order for cyclic graph");
-  return order;
+  return topologicallySortedNodes;
 }
 export function validateConnection(
-  conn: Connection,
+  connection: Connection,
   nodes: Node[],
   edges: Edge[]
 ) {
-  const { source, target } = conn;
-  if (!source || !target) return false;
-  if (source === target) return false;
+  const { source: sourceNodeId, target: targetNodeId } = connection;
+  if (!sourceNodeId || !targetNodeId) return false;
+  if (sourceNodeId === targetNodeId) return false;
 
   // Check if this would create a cycle
-  if (hasPath(target, source, edges)) return false;
+  if (hasPath(targetNodeId, sourceNodeId, edges)) return false;
 
   // Check connection limits: max 1 outgoing and 1 incoming per node
-  const sourceOutgoing = nodeOutgoingCount(source, edges);
-  const targetIncoming = nodeIncomingCount(target, edges);
+  const sourceOutgoingConnectionCount = nodeOutgoingCount(sourceNodeId, edges);
+  const targetIncomingConnectionCount = nodeIncomingCount(targetNodeId, edges);
 
-  if (sourceOutgoing >= 1 || targetIncoming >= 1) return false;
+  if (sourceOutgoingConnectionCount >= 1 || targetIncomingConnectionCount >= 1) return false;
 
   // Validate logical pipeline flow
-  const sourceNode = nodes.find((n) => n.id === source);
-  const targetNode = nodes.find((n) => n.id === target);
+  const sourceNode = nodes.find((node) => node.id === sourceNodeId);
+  const targetNode = nodes.find((node) => node.id === targetNodeId);
   if (!sourceNode || !targetNode) return false;
 
   return validatePipelineFlow(sourceNode.data?.typeId, targetNode.data?.typeId);
 }
 
-function validatePipelineFlow(sourceType: string, targetType: string): boolean {
-  const flowOrder = ["data-source", "transformer", "model", "sink"];
-  const sourceIndex = flowOrder.indexOf(sourceType);
-  const targetIndex = flowOrder.indexOf(targetType);
+function validatePipelineFlow(sourceNodeType: string, targetNodeType: string): boolean {
+  const pipelineFlowOrder = ["data-source", "transformer", "model", "sink"];
+  const sourceNodeTypeIndex = pipelineFlowOrder.indexOf(sourceNodeType);
+  const targetNodeTypeIndex = pipelineFlowOrder.indexOf(targetNodeType);
 
-  if (sourceIndex === -1 || targetIndex === -1) return true; // Unknown types allowed
-  return targetIndex > sourceIndex;
+  if (sourceNodeTypeIndex === -1 || targetNodeTypeIndex === -1) return true; // Unknown types allowed
+  return targetNodeTypeIndex > sourceNodeTypeIndex;
 }

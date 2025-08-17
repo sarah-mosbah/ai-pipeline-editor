@@ -1,4 +1,3 @@
-/* PipelineCanvas specific styles */
 .canvas {
   grid-area: canvas;
   position: relative;
@@ -33,7 +32,6 @@
   border-color: transparent;
 }
 
-/* Node states for ReactFlow nodes */
 .node-idle {
   border: 1px solid var(--muted);
   background: var(--panel);
@@ -47,4 +45,50 @@
 .node-done {
   border: 1px solid var(--ok);
   box-shadow: 0 0 0 2px rgba(var(--ok), 0.1) inset;
+}
+
+
+.react-flow__handle {
+  width: 12px !important;
+  height: 12px !important;
+  background: var(--accent) !important;
+  border: 2px solid var(--text) !important;
+  border-radius: 50% !important;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+
+/* Make handles more visible on hover */
+.react-flow__node:hover .react-flow__handle {
+  opacity: 1;
+  transform: scale(1.2);
+  background: var(--accent) !important;
+  border-color: var(--text) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* Enhanced visibility when dragging */
+.react-flow__node.selected .react-flow__handle,
+.react-flow__node.dragging .react-flow__handle {
+  opacity: 1 !important;
+  transform: scale(1.3) !important;
+  background: var(--accent) !important;
+  border-color: var(--text) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5) !important;
+  z-index: 1000 !important;
+}
+
+/* Make connection line more visible when dragging */
+.react-flow__connection-line {
+  stroke: var(--accent) !important;
+  stroke-width: 3px !important;
+  stroke-dasharray: 5,5 !important;
+  opacity: 0.8 !important;
+}
+
+/* Style for when connection is being created */
+.react-flow__connectionline {
+  stroke: var(--accent) !important;
+  stroke-width: 3px !important;
+  stroke-dasharray: 5,5 !important;
 }
