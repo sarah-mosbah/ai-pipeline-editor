@@ -1,4 +1,3 @@
-/* App layout and component specific styles */
 .app {
   display: grid;
   grid-template-columns: 280px 1fr;
